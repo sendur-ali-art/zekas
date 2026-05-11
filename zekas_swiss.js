@@ -22,8 +22,14 @@ if (typeof document !== 'undefined') {
 }
 
 function startTournament() {
-  const rows = document.querySelectorAll('#player-list .player-row');
   const err = document.getElementById('setup-error');
+  
+  // Turnuva Bilgilerini Al ve Ekrana/Sekmeye Yazdır
+  const gameName = document.getElementById('setup-game-name').value.trim() || 'Zeka Oyunları Turnuvası';
+  const chiefRef = document.getElementById('setup-chief-ref').value.trim() || 'Belirtilmedi';
+  const refs = document.getElementById('setup-refs').value.trim() || 'Belirtilmedi';
+
+  const rows = document.querySelectorAll('#player-list .player-row');
   const raw = [];
   rows.forEach(r => {
     const name = r.querySelector('input[name=name]').value.trim();
@@ -35,6 +41,12 @@ function startTournament() {
 
   const names = raw.map(p => p.name.toLowerCase());
   if (new Set(names).size !== names.length) { err.textContent = 'Aynı isimde oyuncular var, lütfen ayırt edici isimler girin.'; return; }
+
+  // Arayüzü ve Sekme Başlığını Güncelle
+  document.title = gameName; // Sekme başlığı değişir (Pentago / Kulami karışmaz)
+  document.getElementById('display-game-name').textContent = gameName;
+  document.getElementById('display-chief-ref').textContent = chiefRef;
+  document.getElementById('display-refs').textContent = refs;
 
   raw.sort((a, b) => b.rating - a.rating);
   players = raw.map((p, i) => ({
@@ -55,6 +67,7 @@ function startTournament() {
 
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  document.getElementById('official-header').style.display = 'block';
   document.getElementById('info-players').textContent = players.length;
   document.getElementById('info-rounds').textContent = totalRounds;
 
@@ -329,7 +342,7 @@ function renderPairings() {
         <td class="board-num">${idx + 1}</td>
         <td colspan="2"><span class="player-name">${esc(pair.white.name)}</span>
           <span class="rating-tag">(${pair.white.rating})</span></td>
-        <td><span class="bye-result">🌟 BAY (Eşleşmedi, +1 Puan)</span></td>
+        <td><span class="bye-result print-result-space">🌟 BAY (Eşleşmedi)</span></td>
       `;
     } else {
       tr.innerHTML = `
@@ -344,7 +357,7 @@ function renderPairings() {
           <span class="player-name">${esc(pair.black.name)}</span>
           <span class="rating-tag">(${pair.black.rating})</span>
         </td>
-        <td>
+        <td class="print-result-space">
           <div class="result-btns">
             <button class="result-btn white-wins" onclick="setResult(${idx},'1-0',this)">1. Kazandı</button>
             <button class="result-btn draw" onclick="setResult(${idx},'½-½',this)">Berabere</button>
