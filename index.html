@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZEKAS Turnuva Yöneticisi</title>
+<style>
+  :root {
+    /* Daha ferah ve aydınlık renk paleti */
+    --bg: #f0f4f8; 
+    --surface: #ffffff; 
+    --card: #ffffff;
+    --accent: #3b82f6; /* Enerjik Mavi */
+    --accent-hover: #2563eb;
+    --accent2: #8b5cf6; /* Eğlenceli Mor */
+    --accent2-hover: #7c3aed;
+    --text: #1f2937; /* Koyu Gri (Okunabilirlik için) */
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --win: #10b981; /* Canlı Yeşil */
+    --loss: #ef4444; /* Canlı Kırmızı */
+    --draw: #f59e0b; /* Sıcak Turuncu */
+    --bye: #ec4899; /* Pembe */
+    --shadow: 0 4px 15px rgba(0,0,0,0.05); /* Yumuşak Gölgeler */
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  
+  /* Eğlenceli Başlıklar */
+  h1 { text-align: center; padding: 30px 16px; font-size: 2.2rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { color: var(--accent2); margin-bottom: 16px; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; }
+  
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 16px 40px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
+  
+  /* Yumuşak Butonlar */
+  button { cursor: pointer; border: none; border-radius: 10px; padding: 12px 20px; font-size: 0.95rem; font-weight: 700; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+  .btn-secondary { background: var(--accent2); color: white; }
+  .btn-secondary:hover { background: var(--accent2-hover); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+  .btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+  
+  /* Girdi Alanları */
+  input[type=text], input[type=number] {
+    background: #f9fafb; border: 2px solid var(--border); border-radius: 10px;
+    color: var(--text); padding: 10px 14px; font-size: 1rem; width: 100%;
+    outline: none; transition: all 0.2s;
+  }
+  input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+  #player-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .player-row { display: flex; gap: 12px; align-items: center; }
+  .player-row input[name=name] { flex: 2; }
+  .player-row input[name=rating] { flex: 1; }
+  .player-row .btn-del { background: #fee2e2; color: var(--loss); box-shadow: none; }
+  .player-row .btn-del:hover { background: var(--loss); color: white; }
+
+  /* Tablolar */
+  .pairing-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 10px; }
+  .pairing-table th { background: #f3f4f6; color: var(--muted); text-align: left; padding: 12px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+  .pairing-table th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+  .pairing-table th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+  .pairing-table td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .pairing-table tr:last-child td { border-bottom: none; }
+  .pairing-table tr:hover td { background: #f8fafc; }
+  
+  .board-num { color: var(--accent); font-size: 1rem; font-weight: bold; width: 50px; text-align: center; }
+  .player-name { font-weight: 600; font-size: 1.05rem; }
+  .rating-tag { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+  
+  /* 1. ve 2. Oyuncu Renk Simgeleri */
+  .color-w { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); margin-right: 8px; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+  .color-b { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--loss); margin-right: 8px; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
+  
+  .result-btns { display: flex; gap: 8px; }
+  .result-btn { padding: 8px 16px; border-radius: 8px; border: 2px solid var(--border); background: #fff; color: var(--muted); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: none; }
+  .result-btn:hover { border-color: var(--muted); }
+  .result-btn.white-wins.active { background: var(--win); border-color: var(--win); color: white; box-shadow: 0 2px 4px rgba(16,185,129,0.3); }
+  .result-btn.draw.active { background: var(--draw); border-color: var(--draw); color: white; box-shadow: 0 2px 4px rgba(245,158,11,0.3); }
+  .result-btn.black-wins.active { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 2px 4px rgba(59,130,246,0.3); }
+  .bye-result { color: var(--bye); font-weight: bold; background: #fdf2f8; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; }
+
+  .standings-table { width: 100%; border-collapse: collapse; }
+  .standings-table th { background: #f3f4f6; color: var(--muted); padding: 12px; text-align: left; font-size: 0.85rem; font-weight: 700; }
+  .standings-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+  .standings-table tr:first-child td { background: #fffbeb; font-weight: bold; } /* 1. Sıra Altın Tonu */
+  .rank-col { width: 40px; color: var(--muted); font-weight: bold; }
+  .score-col { font-weight: 800; font-size: 1.1rem; color: var(--accent); }
+  .tiebreak-col { color: var(--muted); font-size: 0.9rem; }
+
+  .cross-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .cross-table th { background: #f3f4f6; color: var(--muted); padding: 10px; text-align: center; border: 1px solid var(--border); font-weight: 700; }
+  .cross-table td { padding: 8px; border: 1px solid var(--border); text-align: center; }
+  .cross-table .name-cell { text-align: left; font-weight: 600; min-width: 140px; }
+  .cross-table .self-cell { background: #f3f4f6; color: #d1d5db; }
+  .res-w { color: var(--win); font-weight: 800; }
+  .res-d { color: var(--draw); font-weight: 800; }
+  .res-l { color: var(--loss); font-weight: 800; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .round-badge { background: #ede9fe; color: var(--accent2); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 800; border: 1px solid #ddd6fe; }
+  .info-bar { background: linear-gradient(to right, #ffffff, #f8fafc); border: 1px solid var(--border); border-radius: 12px; padding: 16px 24px; margin-bottom: 24px; display: flex; gap: 30px; font-size: 0.95rem; font-weight: 600; color: var(--muted); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+  .info-bar span { color: var(--accent); font-weight: 800; font-size: 1.1rem; margin-left: 6px; }
+  
+  .finished-banner { text-align: center; padding: 40px; background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: #fde68a; }
+  .finished-banner h2 { font-size: 2.5rem; color: #d97706; margin-bottom: 12px; justify-content: center; }
+  .finished-banner p { color: #92400e; font-size: 1.1rem; font-weight: 500; }
+  #app { display: none; }
+</style>
+</head>
+<body>
+<h1>🧠 Zeka Oyunları Turnuvası 🏆</h1>
+<div class="container">
+
+  <!-- Kurulum Ekranı -->
+  <div id="setup-screen">
+    <div class="card">
+      <div class="section-header">
+        <h2>👥 Oyuncu Listesi</h2>
+        <button class="btn-secondary btn-sm" onclick="addPlayerRow()">➕ Yeni Oyuncu</button>
+      </div>
+      <div id="player-list"></div>
+      <div style="display:flex;gap:15px;margin-top:16px;align-items:center;">
+        <button class="btn-primary" onclick="startTournament()">🚀 Turnuvayı Başlat (1. Tur)</button>
+        <span id="setup-error" style="color:var(--loss);font-weight:600;font-size:0.9rem;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ana Turnuva Ekranı -->
+  <div id="app">
+    <div class="info-bar">
+      <div>🧑‍🤝‍🧑 Oyuncu Sayısı: <span id="info-players"></span></div>
+      <div>🎯 Toplam Tur: <span id="info-rounds"></span></div>
+      <div>🔥 Mevcut Tur: <span id="info-current"></span></div>
+    </div>
+
+    <!-- Mevcut Tur Eşleşmeleri -->
+    <div class="card" id="round-card">
+      <div class="section-header">
+        <h2 id="round-title">⚔️ 1. Tur Eşleşmeleri</h2>
+        <span class="round-badge" id="round-badge">Tur 1</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="pairing-table">
+          <thead>
+            <tr>
+              <th class="board-num">Masa</th>
+              <th>1. Oyuncu (Başlayan)</th>
+              <th>2. Oyuncu</th>
+              <th>Maç Sonucu</th>
+            </tr>
+          </thead>
+          <tbody id="pairings-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:20px; display:flex; align-items:center;">
+        <button class="btn-primary" id="next-round-btn" onclick="submitRound()" disabled>✅ Sonuçları Kaydet & Sonraki Tur</button>
+        <span id="result-error" style="color:var(--loss);font-weight:600;font-size:0.9rem;margin-left:16px;"></span>
+      </div>
+    </div>
+
+    <!-- Geç Kayıt Alanı (Sadece 1. Tur) -->
+    <div class="card" id="late-join-card" style="display:none; background: #f8fafc;">
+      <div class="section-header" style="cursor:pointer; margin-bottom:0;" onclick="toggleLateJoin()">
+        <h2 style="color:var(--muted);font-size:1.1rem; margin:0;">⏱️ Geç Kayıt Yapan Oyuncu</h2>
+        <button class="btn-secondary btn-sm" id="late-join-toggle" onclick="event.stopPropagation();toggleLateJoin()">Aç / Kapat</button>
+      </div>
+      <div id="late-join-body" style="display:none; margin-top:16px;">
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;font-weight:500;">
+          Turnuva başladıktan sonra gelen oyuncuyu buradan ekleyebilirsiniz. İlk turu BAY geçip 2. turdan eşleşmelere dahil olur.
+        </p>
+        <div class="player-row" style="margin-bottom:16px;">
+          <input type="text" id="late-name" placeholder="Geç Kalan Oyuncunun Adı" style="flex:2;">
+          <input type="number" id="late-rating" placeholder="Kuvvet Puanı (Örn: 1000)" min="0" max="3500" style="flex:1;">
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn-secondary" onclick="addLatePlayer()">➕ Oyuncuyu Dahil Et</button>
+          <span id="late-error" style="color:var(--loss);font-weight:600;font-size:0.9rem;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Turnuva Bitti Afişi -->
+    <div class="card finished-banner" id="finished-banner" style="display:none;">
+      <h2>🎉 Turnuva Sona Erdi! 🎉</h2>
+      <p>Kıyasıya bir mücadelenin ardından şampiyon belli oldu. Tebrikler!</p>
+    </div>
+
+    <!-- Sıralama ve Tablolar -->
+    <div class="two-col" id="tables-area" style="display:none;">
+      <div class="card">
+        <h2>🥇 Genel Sıralama</h2>
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th class="rank-col">#</th>
+              <th>Oyuncu</th>
+              <th>Puan</th>
+              <th>Buchholz</th>
+              <th>S-B</th>
+            </tr>
+          </thead>
+          <tbody id="standings-body"></tbody>
+        </table>
+      </div>
+      <div class="card" style="overflow-x:auto;">
+        <h2>📊 Çapraz Tablo</h2>
+        <div id="cross-table-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- YENİ JAVASCRIPT DOSYASI BURAYA BAĞLI -->
+<script src="zekas_swiss.js"></script>
+</body>
+</html>
