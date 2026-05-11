@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zekas Turnuva Yöneticisi</title>
+<title>ZEKAS TURNUVA YÖNETİMİ</title>
 <style>
   :root {
     --bg: #f0f4f8; --surface: #ffffff; --card: #ffffff;
@@ -37,7 +37,6 @@
   }
   input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-  /* Kurulum Ekranı Yeni Alanlar */
   .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 2px dashed var(--border); }
   @media (max-width: 720px) { .setup-grid { grid-template-columns: 1fr; } }
 
@@ -92,7 +91,6 @@
   
   .finished-banner { text-align: center; padding: 40px; background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: #fde68a; }
 
-  /* RESMİ BİLGİ BAŞLIĞI (Sadece Uygulama Başlayınca Görünür) */
   #official-header { display: none; text-align: center; margin-bottom: 20px; }
   #official-header h1 { padding: 0; margin-bottom: 8px; color: var(--text); background: none; -webkit-text-fill-color: var(--text); }
   #official-header p { font-size: 1.05rem; color: var(--muted); }
@@ -100,21 +98,17 @@
 
   #app { display: none; }
 
-  /* 🖨️ YAZDIRMA (PRINT) AYARLARI */
   @media print {
     body { background: white; color: black; font-size: 12pt; }
     h1 { -webkit-text-fill-color: black; }
     .card { box-shadow: none; border: none; padding: 0; margin-bottom: 30px; }
     .info-bar { border: 1px solid #000; flex-wrap: wrap; gap: 10px; }
-    /* Gizlenecek Elemanlar */
     button, .result-btns, #late-join-card, #setup-screen { display: none !important; }
     .round-badge { border: 1px solid #000; color: #000; }
-    /* Tabloları Siyah-Beyaz ve Keskin Yap */
     .pairing-table th, .standings-table th, .cross-table th { background: #eee !important; color: black; border-bottom: 2px solid black; }
     .pairing-table td, .standings-table td, .cross-table td { border-bottom: 1px solid #ccc; }
     .color-w { background: white; border: 1px solid black; box-shadow: none; }
     .color-b { background: black; border: 1px solid black; box-shadow: none; }
-    /* Hakemler için boş imza/sonuç alanı oluştur */
     .print-result-space::after { content: "Hakem Onayı: ........................"; color: #777; font-size: 0.9rem; font-style: italic; }
   }
 </style>
@@ -125,15 +119,16 @@
 
   <!-- Kurulum Ekranı -->
   <div id="setup-screen">
-    <h1 style="padding-top:40px;">🧠 Turnuva Kurulumu 🏆</h1>
+    <h1 style="padding-top:40px;">🧠 ZEKAS TURNUVA YÖNETİMİ 🏆</h1>
     <div class="card">
       <div class="section-header">
         <h2>📋 Turnuva Bilgileri</h2>
       </div>
       <div class="setup-grid">
-        <input type="text" id="setup-game-name" placeholder="Oyun Adı (Örn: Kulami İlçe Şampiyonası)">
+        <input type="text" id="setup-game-name" placeholder="Oyun Adı (Örn: Kulami Şampiyonası)">
         <input type="text" id="setup-chief-ref" placeholder="Baş Hakem / Yönetici Adı">
-        <input type="text" id="setup-refs" placeholder="Hakemler (İsteğe Bağlı, virgülle ayırın)" style="grid-column: 1 / -1;">
+        <input type="text" id="setup-refs" placeholder="Hakemler (virgülle ayırın)">
+        <input type="number" id="setup-manual-rounds" placeholder="Tur Sayısı (Boşsa otomatik hesaplar)" min="1">
       </div>
 
       <div class="section-header">
@@ -151,7 +146,6 @@
   <!-- Ana Turnuva Ekranı -->
   <div id="app">
     
-    <!-- Resmi Turnuva Başlığı (Çıktılarda en üstte çıkacak) -->
     <div id="official-header">
       <h1 id="display-game-name">Turnuva Adı</h1>
       <p><strong>Baş Hakem:</strong> <span id="display-chief-ref">-</span> &nbsp;|&nbsp; <strong>Hakemler:</strong> <span id="display-refs">-</span></p>
