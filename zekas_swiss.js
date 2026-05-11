@@ -43,7 +43,7 @@ function startTournament() {
   if (new Set(names).size !== names.length) { err.textContent = 'Aynı isimde oyuncular var, lütfen ayırt edici isimler girin.'; return; }
 
   // Arayüzü ve Sekme Başlığını Güncelle
-  document.title = gameName; // Sekme başlığı değişir (Pentago / Kulami karışmaz)
+  document.title = gameName + " - ZEKAS"; 
   document.getElementById('display-game-name').textContent = gameName;
   document.getElementById('display-chief-ref').textContent = chiefRef;
   document.getElementById('display-refs').textContent = refs;
@@ -62,7 +62,18 @@ function startTournament() {
     byeRounds: 0,
   }));
 
-  totalRounds = numRounds(players.length);
+  // BAŞ HAKEMİN GİRDİĞİ TUR SAYISINI KONTROL ET
+  const manualRounds = parseInt(document.getElementById('setup-manual-rounds').value);
+  const calculatedRounds = numRounds(players.length);
+  const chosenRounds = (manualRounds > 0) ? manualRounds : calculatedRounds;
+
+  // İsviçre Sistemi Üst Sınır Kontrolü (Kimse iki kez oynayamaz)
+  if (chosenRounds > players.length - 1) {
+    err.textContent = `HATA: ${players.length} oyuncu ile en fazla ${players.length - 1} tur oynatabilirsiniz. Lütfen tur sayısını düşürün veya boş bırakın.`;
+    return;
+  }
+
+  totalRounds = chosenRounds;
   currentRound = 0;
 
   document.getElementById('setup-screen').style.display = 'none';
@@ -316,11 +327,17 @@ function addLatePlayer() {
   };
 
   players.push(newPlayer);
-  const newTotalRounds = numRounds(players.length);
-  if (newTotalRounds > totalRounds) {
-    totalRounds = newTotalRounds;
+  
+  // Geç kayıt sonrası tur sayısı hesabı ve manuel sınır kontrolü
+  const manualRounds = parseInt(document.getElementById('setup-manual-rounds').value);
+  const calculatedRounds = numRounds(players.length);
+  const chosenRounds = (manualRounds > 0) ? manualRounds : calculatedRounds;
+
+  if (chosenRounds > totalRounds && chosenRounds <= players.length - 1) {
+    totalRounds = chosenRounds;
     document.getElementById('info-rounds').textContent = totalRounds;
   }
+
   document.getElementById('info-players').textContent = players.length;
 
   currentPairings.push({ white: newPlayer, black: null });
